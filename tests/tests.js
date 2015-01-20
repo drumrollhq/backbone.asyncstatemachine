@@ -1,5 +1,10 @@
 $(document).ready(function(){
 
+window.onunhandledrejection = function(reason, promise) {
+  console.error(reason)
+  throw reason
+}
+
 module('StateMachine')
 
   var stateMachine = {}
@@ -25,7 +30,7 @@ module('StateMachine')
     },
     states: {
       'visible': {enter: ['enterVisible1', 'enterVisible2'], leave: ['leaveVisible1', 'leaveVisible2']},
-      'hidden': {enter: ['enterHidden1']}
+      'hidden': {enter: ['enterHidden1']},
     },
     visibleToHidden1: function() {this._saveCb('visibleToHidden1', arguments)},
     visibleToHidden2: function() {this._saveCb('visibleToHidden2', arguments)},
@@ -64,48 +69,56 @@ module('StateMachine')
     deepEqual(stateMachine.getMachineEvents(), ['initialized', 'hide', 'show', 'panic'])
   })
 
-  test('StateMachine - transition events and arguments', function () {
+  asyncTest('StateMachine - transition events and arguments', function () {
     stateMachine.testSetUp('visible', true)
     stateMachine.trigger('hide', 'behind a tree')
-    equal(stateMachine.currentState, 'hidden')
-    deepEqual(stateMachine.eventsData, [
-      ['leaveState:visible', 'behind a tree'],
-      ['transition', 'visible', 'hidden', 'behind a tree'],
-      ['enterState:hidden', 'behind a tree'],
-      ['hide', 'behind a tree']                           // the initial trigger
-    ])
+    Promise.delay(0).then(function() {
+      equal(stateMachine.currentState, 'hidden')
+      deepEqual(stateMachine.eventsData, [
+        ['hide', 'behind a tree'],                          // the initial trigger
+        ['leaveState:visible', 'behind a tree'],
+        ['transition', 'visible', 'hidden', 'behind a tree'],
+        ['enterState:hidden', 'behind a tree']
+      ])
+    }).finally(QUnit.start)
   })
 
-  test("StateMachine - transition's 'triggers' option", function () {
+  asyncTest("StateMachine - transition's 'triggers' option", function () {
     stateMachine.testSetUp('hidden', true)
     stateMachine.trigger('show', 'shamelessly', 'your', 'feet')
-    equal(stateMachine.currentState, 'visible')
-    deepEqual(stateMachine.eventsData, [
-      ['leaveState:hidden', 'shamelessly', 'your', 'feet'],
-      ['transition', 'hidden', 'visible', 'shamelessly', 'your', 'feet'],
-      ['showTime', 'shamelessly', 'your', 'feet'],
-      ['enterState:visible', 'shamelessly', 'your', 'feet'],
-      ['show', 'shamelessly', 'your', 'feet']             // the initial trigger
-    ])
+    Promise.delay(0).then(function() {
+      equal(stateMachine.currentState, 'visible')
+      deepEqual(stateMachine.eventsData, [
+        ['show', 'shamelessly', 'your', 'feet'],             // the initial trigger
+        ['leaveState:hidden', 'shamelessly', 'your', 'feet'],
+        ['transition', 'hidden', 'visible', 'shamelessly', 'your', 'feet'],
+        ['showTime', 'shamelessly', 'your', 'feet'],
+        ['enterState:visible', 'shamelessly', 'your', 'feet']
+      ])
+    }).finally(QUnit.start)
   })
 
-  test('StateMachine - transition callbacks and arguments', function () {
+  asyncTest('StateMachine - transition callbacks and arguments', function () {
     stateMachine.testSetUp('visible')
     stateMachine.trigger('hide', 'under your bed')
-    equal(stateMachine.currentState, 'hidden')
-    deepEqual(stateMachine.cbData, [
-      ['leaveVisible1', 'under your bed'],
-      ['leaveVisible2', 'under your bed'],
-      ['visibleToHidden1', 'under your bed'],
-      ['visibleToHidden2', 'under your bed'],
-      ['enterHidden1', 'under your bed']
-    ])
+    Promise.delay(0).then(function() {
+      equal(stateMachine.currentState, 'hidden')
+      deepEqual(stateMachine.cbData, [
+        ['leaveVisible1', 'under your bed'],
+        ['leaveVisible2', 'under your bed'],
+        ['visibleToHidden1', 'under your bed'],
+        ['visibleToHidden2', 'under your bed'],
+        ['enterHidden1', 'under your bed']
+      ])
+    }).finally(QUnit.start)
   })
 
-  test('StateMachine - declaring transition with a wildcard', function () {
+  asyncTest('StateMachine - declaring transition with a wildcard', function () {
     stateMachine.testSetUp('visible')
     stateMachine.trigger('panic')
-    equal(stateMachine.currentState, 'panicking')
+    Promise.delay(0).then(function() {
+      equal(stateMachine.currentState, 'panicking')
+    }).finally(QUnit.start)
   })
 
   test('StateMachine - toState', function () {
@@ -117,33 +130,37 @@ module('StateMachine')
     ])
   })
 
-  test('StateMachine - no transition', function () {
+  asyncTest('StateMachine - no transition', function () {
     stateMachine.testSetUp('hidden', true)
     stateMachine.trigger('hide')
-    equal(stateMachine.currentState, 'hidden')
-    deepEqual(stateMachine.eventsData, [
-      ['hide']                                            // the initial trigger
-    ])
-    deepEqual(stateMachine.cbData, [])
+    Promise.delay(0).then(function() {
+      equal(stateMachine.currentState, 'hidden')
+      deepEqual(stateMachine.eventsData, [
+        ['hide']                                            // the initial trigger
+      ])
+      deepEqual(stateMachine.cbData, [])
+    }).finally(QUnit.start)
   })
 
-  test('StateMachine - trigger silent', function () {
+  asyncTest('StateMachine - trigger silent', function () {
     stateMachine.testSetUp('hidden', true)
     stateMachine.silent = true
     stateMachine.trigger('show', 'bla')
-    equal(stateMachine.currentState, 'visible')
-    deepEqual(stateMachine.eventsData, [
-      ['show', 'bla']                                     // the initial trigger
-    ])
-    deepEqual(stateMachine.cbData, [
-      ['hiddenToVisible1', 'bla'],
-      ['hiddenToVisible2', 'bla'],
-      ['enterVisible1', 'bla'],
-      ['enterVisible2', 'bla']
-    ])
+    Promise.delay(0).then(function() {
+      equal(stateMachine.currentState, 'visible')
+      deepEqual(stateMachine.eventsData, [
+        ['show', 'bla']                                     // the initial trigger
+      ])
+      deepEqual(stateMachine.cbData, [
+        ['hiddenToVisible1', 'bla'],
+        ['hiddenToVisible2', 'bla'],
+        ['enterVisible1', 'bla'],
+        ['enterVisible2', 'bla']
+      ])
+    }).finally(QUnit.start)
   })
 
-  test('StateMachine - enter callback can trigger other transitions', function () {
+  asyncTest('StateMachine - enter callback can trigger other transitions', function () {
     var stateMachine = _.extend({}, Backbone.StateMachine, Backbone.Events, {
       transitions: {
         'init': { 'show': 'visible' },
@@ -159,10 +176,93 @@ module('StateMachine')
       allTransitions.push([leave, enter])
     })
     stateMachine.trigger('show')
-    deepEqual(allTransitions, [['init', 'visible'], ['visible', 'hidden']])
-
+    Promise.delay(0).then(function() {
+      deepEqual(allTransitions, [['init', 'visible'], ['visible', 'hidden']])
+    }).finally(QUnit.start)
   })
 
+  asyncTest('StateMachine - triggerAsync returns a promise of transition callbacks', function () {
+    var resolve;
+
+    var stateMachine = _.extend({}, Backbone.StateMachine, Backbone.Events, {
+      transitions: {
+        init: { 'show': 'promisedShow' }
+      },
+      states: {
+        init: {},
+        promisedShow: {enter: ['promisedShow']}
+      },
+      promisedShow: function() {
+        return new Promise(function(res, rej) { resolve = res; });
+      }
+    })
+    stateMachine.startStateMachine()
+
+    var resolved = false;
+    stateMachine.triggerAsync('show').then(function() {
+      resolved = true
+    })
+
+    Promise.delay(0).then(function() {
+      equal(resolved, false)
+      resolve()
+      return Promise.delay(0)
+    }).then(function() {
+      equal(resolved, true)
+    }).finally(QUnit.start);
+  });
+
+  asyncTest('StateMachine - triggerAsync should wait for the previous transition to finish', function () {
+    var showResolve, hideResolve;
+
+    var stateMachine = _.extend({}, Backbone.StateMachine, Backbone.Events, {
+      transitions: {
+        init: { 'show': 'promisedShow' },
+        promisedShow: { 'hide': 'promisedHide' }
+      },
+      states: {
+        init: {},
+        promisedShow: {enter: ['promisedShow']},
+        promisedHide: {enter: ['promisedHide']}
+      },
+      promisedShow: function() {
+        return new Promise(function(res, rej) { showResolve = res; });
+      },
+      promisedHide: function() {
+        return new Promise(function(res, rej) { hideResolve = res; });
+      }
+    });
+    stateMachine.startStateMachine();
+
+    var showResolved = false, hideResolved = false;
+
+    stateMachine.triggerAsync('show').then(function() {
+      showResolved = true;
+    });
+
+    Promise.delay(1).then(function() {
+      stateMachine.triggerAsync('hide').then(function() {
+        hideResolved = true;
+      });
+      return Promise.delay(1);
+    }).then(function() {
+      equal(showResolved, false, 'nothing should have been resolved yet, but show has');
+      equal(hideResolved, false, 'nothing should have been resolbed yet, but hide has');
+      equal(hideResolve, undefined)
+      return Promise.delay(1);
+    }).then(function() {
+      equal(showResolved, false, 'Show has resolved, but show shouldnt have done');
+      equal(hideResolved, false, 'Hide has resolved, but should be waiting for show to complete');
+      showResolve();
+      return Promise.delay(1);
+    }).then(function() {
+      hideResolve()
+      return Promise.delay(1);
+    }).then(function() {
+      equal(showResolved, true, 'show should have resolved by now');
+      equal(hideResolved, true, 'hide should have resolved by now');
+    }).finally(QUnit.start)
+  });
   var eventSender = {}
   _.extend(eventSender, Backbone.Events)
 
@@ -208,43 +308,54 @@ module('StatefulView')
     ok(statefulView instanceof Backbone.View)
   })
 
-  test('StatefulView - transition css class auto', function () {
+  asyncTest('StatefulView - transition css class auto', function () {
     statefulView.testSetUp('hidden')
     statefulView.trigger('show')
-    equal(statefulView.currentState, 'visible')
-    equal($(statefulView.el).attr('class'), 'visible')
+    Promise.delay(0).then(function() {
+      equal(statefulView.currentState, 'visible')
+      equal($(statefulView.el).attr('class'), 'visible')
+    }).finally(QUnit.start)
   })
 
-  test('StatefulView - transition css class provided', function () {
+  asyncTest('StatefulView - transition css class provided', function () {
     statefulView.testSetUp('visible')
     statefulView.trigger('hide')
-    equal(statefulView.currentState, 'hidden')
-    equal($(statefulView.el).attr('class'), 'hiddenBehindTree')
+    Promise.delay(0).then(function() {
+      equal(statefulView.currentState, 'hidden')
+      equal($(statefulView.el).attr('class'), 'hiddenBehindTree')
+    }).finally(QUnit.start)
   })
 
-  test('StatefulView - trigger DOM events', function () {
+  asyncTest('StatefulView - trigger DOM events', function () {
     statefulView.testSetUp('hidden')
 
     // simple test
     $('.clickable2', statefulView.el).trigger('click')
-    equal(statefulView.currentState, 'hidden')
-
-    $('.clickable2', statefulView.el).trigger('show')
-    equal(statefulView.currentState, 'visible')
-
-    $('.clickable2', statefulView.el).trigger('click')
-    equal(statefulView.currentState, 'hidden')
-    equal(statefulView.clickEvent.type, 'click')
-
-    // test with events that occur in several transitions
-    // and with DOM events.
-    $('.clickable', statefulView.el).trigger('click')
-    equal(statefulView.currentState, 'visible')
-    // Test that standard View.events callbacks are still called
-    equal(statefulView.clicked, true)
-
-    $('.clickable', statefulView.el).trigger('hide')
-    equal(statefulView.currentState, 'hidden')
+    Promise.delay(0).then(function() {
+      equal(statefulView.currentState, 'hidden')
+      $('.clickable2', statefulView.el).trigger('show')
+      return Promise.delay(0)
+    }).then(function() {
+      equal(statefulView.currentState, 'visible')
+      $('.clickable2', statefulView.el).trigger('click')
+      return Promise.delay(0)
+    }).then(function() {
+      equal(statefulView.currentState, 'hidden')
+      equal(statefulView.clickEvent.type, 'click')
+      // test with events that occur in several transitions
+      // and with DOM events.
+      $('.clickable', statefulView.el).trigger('click')
+      return Promise.delay(0)
+    }).then(function() {
+      equal(statefulView.currentState, 'visible')
+      // Test that standard View.events callbacks are still called
+      equal(statefulView.clicked, true)
+      $('.clickable', statefulView.el).trigger('hide')
+      return Promise.delay(0)
+    }).then(function() {
+      equal(statefulView.currentState, 'hidden')
+      return Promise.delay(0)
+    }).finally(QUnit.start)
   })
 
 module('StatefulModel')
@@ -260,11 +371,13 @@ module('StatefulModel')
     ok(statefulModel instanceof Backbone.Model)
   })
 
-  test('StatefulModel - sanity test', function () {
+  asyncTest('StatefulModel - sanity test', function () {
     ok(statefulModel.get('attr1'), 11)
     ok(statefulModel.get('attr2'), 22)
     ok(statefulModel.trigger('initialized'))
-    equal(statefulModel.currentState, 'idle')
+    Promise.delay(0).then(function() {
+      equal(statefulModel.currentState, 'idle')
+    }).finally(QUnit.start)
   })
 
 })

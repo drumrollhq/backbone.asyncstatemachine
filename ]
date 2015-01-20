@@ -134,7 +134,7 @@
 
       // Trigger a transition, returning a promise that will resolve when the transition is complete
       triggerAsync: function(event) {
-        this.trigger.apply(this, _.toArray(arguments).slice().concat([{_stateMachineIgnore: true}]))
+        this.trigger(arguments.slice().concat([{_stateMachineIgnore: true}]))
         return this._onMachineEvent.apply(this, arguments)
       },
 
@@ -142,7 +142,7 @@
       _doTransition: function(data, event) {
         var extraArgs = _.toArray(arguments).slice(2),
         lastTransition = this._lastTransition || Promise.resolve()
-        this._lastTransition = lastTransition.then(_.bind(function() {
+        return this._lastTransition = lastTransition.then(_.bind(function() {
           var leaveState = this.currentState,
           enterState = data.enterState,
           triggers = data.triggers,
@@ -165,8 +165,6 @@
           promises = promises.concat(this.toState.apply(this, [enterState].concat(extraArgs)))
           return Promise.all(promises)
         }, this))
-
-        return this._lastTransition;
       },
 
       // Declares transitions from `this.transitions`, which is a hash :
