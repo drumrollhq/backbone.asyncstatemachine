@@ -1,8 +1,8 @@
 {
-  "name": "backbone.statemachine",
-  "version": "0.2.6",
+  "name": "backbone.asyncstatemachine",
+  "version": "0.3.0",
   "description": "Simple finite-state machine for Backbone. View states made easy. Synchronizing your application's parts with events made easy.",
-  "main": "backbone.statemachine.js",
+  "main": "backbone.asyncstatemachine.js",
   "directories": {
     "example": "examples",
     "test": "tests"
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sebpiq/backbone.statemachine.git"
+    "url": "https://github.com/drumrollhq/backbone.asyncstatemachine.git"
   },
   "keywords": [
     "backbone",
@@ -34,6 +34,6 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sebpiq/backbone.statemachine/issues"
+    "url": "https://github.com/drumrollhq/backbone.asyncstatemachine/issues"
   }
 }
