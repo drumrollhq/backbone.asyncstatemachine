@@ -1,7 +1,12 @@
-Backbone.StateMachine
+Backbone.AsyncStateMachine
 =======================
 
-Is a small javascript library to add state machine capacities to any *Backbone* or *non-Backbone* object.
+Is a small javascript library to add state machine capacities to any
+*Backbone* or *non-Backbone* object.
+
+Originally forked from https://github.com/sebpiq/backbone.statemachine.
+This version works asynchronously, and adds the `triggerAsync` method
+which returns a promise.
 
 
 Index
