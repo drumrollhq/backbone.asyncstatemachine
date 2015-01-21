@@ -142,7 +142,7 @@
       _doTransition: function(data, event) {
         var extraArgs = _.toArray(arguments).slice(2),
         lastTransition = this._lastTransition || Promise.resolve()
-        this._lastTransition = lastTransition.then(_.bind(function() {
+        this._lastTransition = lastTransition.finally(_.bind(function() {
           var leaveState = this.currentState,
           enterState = data.enterState,
           triggers = data.triggers,
